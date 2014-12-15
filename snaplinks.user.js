@@ -6,6 +6,8 @@
 // @include      http://sc.chinaz.com/*/*
 // @include      http://www.zei8.com/*
 // @include      http://www.wrshu.com/xiaoshuo/special/*.html
+// @downloadURL    https://raw.githubusercontent.com/jasonshaw/userscript/master/snaplinks.user.js
+// @updateURL         https://raw.githubusercontent.com/jasonshaw/userscript/master/snaplinks.user.js
 // @Grant        GM_openInTab
 // @Grant        GM_notification
 // @copyright  2014+, jasonshaw
