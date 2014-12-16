@@ -1,44 +1,80 @@
 // ==UserScript==
-// @name 网页自动化系列点击
-// @namespace autoClick1by1.jasonshaw
-// @version 0.2
-// @description 匹配的任意url，顺序逐个点击设定的obj，任意不存在则彻底停止
-// @include http://*.kdslife.com/show/photo/*.html
-// @include http://www.repaik.com/forum.php?mod=viewthread*
-// @include http://*.pcauto.com.cn/*/*/*/*.html
-// @include http://bbs.pinggu.org/plugin.php?id=dsu_paulsign:sign*
-// @include http://www.repaik.com/plugin.php?id=dsu_paulsign:sign*
-// @include http://bbs.kafan.cn/thread-*-*-*.html
-// @downloadURL    https://github.com/jasonshaw/userscript/blob/master/autoClick1by1.user.js
-// @updateURL      https://github.com/jasonshaw/userscript/blob/master/autoClick1by1.user.js
-// @note 支持kds阻止相册自动翻页
-// @note 支持睿派克、人大论坛自动等自动签到
-// @note 支持卡饭、睿派克自动关闭侧栏
-// @note 支持太平洋汽车本页展开全部内容
-// @run-at document-end
-// @copyright 2014+, jasonshaw
+// @name  网页自动化系列点击
+// @namespace  autoClick1by1.jasonshaw
+// @version    0.3
+// @description  匹配的任意url，顺序逐个点击设定的obj，任意不存在则彻底停止
+// @include      http://*.kdslife.com/show/photo/*.html
+// @include      http://www.repaik.com/forum.php?mod=viewthread*
+// @include      http://*.pcauto.com.cn/*/*/*/*.html
+// @include      http://bbs.pinggu.org/plugin.php?id=dsu_paulsign:sign*
+// @include      http://www.repaik.com/plugin.php?id=dsu_paulsign:sign*
+// @include      http://bbs.kafan.cn/thread-*-*-*.html
+// @downloadURL    https://github.com/jasonshaw/userscript/raw/master/autoClick1by1.user.js
+// @updateURL    https://github.com/jasonshaw/userscript/raw/master/autoClick1by1.user.js
+// @note         允许自定义网站的点击延迟时间
+// @note         允许自定义网站的是否在系列点击之后关闭网页
+// @note         增加脚本运行判断，解决个别页面动态加载问题，比如睿派克签到
+// @note         支持kds阻止相册自动翻页
+// @note         支持睿派克、人大论坛自动等自动签到
+// @note         支持卡饭、睿派克自动关闭侧栏
+// @note         支持太平洋汽车本页展开全部内容
+// @run-at       document-end
+// @copyright  2014+, jasonshaw
 // ==/UserScript==
 (function(){
-var prefs = {
-kds:[/http:\/\/model\.kdslife\.com\/show\/photo\/\d+\.html/i,'input[type="radio"][value="stop"]'],//第一个参数定义href正则，后续所有参数为要点击的按钮的css3 selector
-repaik:[/http:\/\/www\.repaik\.com\/forum\.php\?mod=viewthread&tid=\d+/i,'a.btn_s_close'],
-pcauto:[/http:\/\/\w+\.pcauto\.com\.cn\/.+\.html/i,'div.pageViewGuidedd > a[rel="nofollow"]'],
-pinggu:[/http:\/\/bbs\.pinggu\.org\/plugin\.php\?id=dsu_paulsign:sign/,'ul.qdsmile > li#fd','table[class="tfm qdtfm"] input[value="2"]','td.qdnewtd3 > a'],
-repaik1:[/http:\/\/www\.repaik\.com\/plugin\.php\?id=dsu_paulsign:sign/,'ul.qdsmile > li#ch','table[class="tfm"] input[value="2"]','.tr3 > div:nth-child(2) > a > img'],
-kafan:[/http:\/\/bbs\.kafan\.cn\/thread-\d+-\d+-\d+\.html/,'a.btn_s_close']//,
-};
-var href = window.location.href,site = null,i = 1;
-for (var key in prefs) if(prefs[key][0].test(href)) {site = key;break;}
-//alert(site);
-if(site == null) return;
-setTimeout(function(){
-try {
-while(prefs[site][i]){
-var obj = document.querySelector(prefs[site][i]);
-if(obj == null) return;//alert(prefs[site][i]); continue;
-obj.click();
-i++
-}
-} catch(e){alert(e)}
-}, 500);
+	var autoClose = false,delay = 500;
+	var prefs = {
+		'kds': {
+			startReg: /http:\/\/model\.kdslife\.com\/show\/photo\/\d+\.html/i,//定义href正则
+			autoClose: true,//config中dom.allow_scripts_to_close_windows  需要为true, 存在风险，请谨慎使用
+			elements: ['.bigp_nav2 > form > input[value="stop"]'],//所有参数为要点击的按钮的css3 selector
+			delay: 500
+		},
+		'repaik': {
+			startReg: /http:\/\/www\.repaik\.com\/forum\.php\?mod=viewthread&tid=\d+/i,
+			elements: ['a.btn_s_close']
+		},
+		'pcauto': {
+			startReg: /http:\/\/\w+\.pcauto\.com\.cn\/.+\.html/i,
+			elements: ['div.pageViewGuidedd > a[rel="nofollow"]']
+		},
+		'pinggu': {
+			startReg: /http:\/\/bbs\.pinggu\.org\/plugin\.php\?id=dsu_paulsign:sign/,
+			elements: ['ul.qdsmile > li#fd','table[class="tfm qdtfm"] input[value="2"]','td.qdnewtd3 > a']
+		},
+		'repaik1': {
+			startReg: /http:\/\/www\.repaik\.com\/plugin\.php\?id=dsu_paulsign:sign/,
+			elements: ['ul.qdsmile > li#ch','table[class="tfm"] input[value="2"]','.tr3 > div:nth-child(2) > a > img']
+		},
+		'kafan': {
+			startReg: /http:\/\/bbs\.kafan\.cn\/thread-\d+-\d+-\d+\.html/,
+			elements: ['a.btn_s_close']
+		}
+	};
+	function autoClick1by1(){
+		var href = window.location.href,site = null,i = 0;
+		for (var key in prefs) if(prefs[key].startReg.test(href)) {site = key;break;}
+		if(site == null) return;
+		var elements = prefs[site].elements;
+		autoClose = prefs[site].autoClose || autoClose;
+		delay = prefs[site].delay || delay;
+		setTimeout(function(){
+			try {
+				var elements = prefs[site].elements;
+				alert(elements);
+				while(elements[i]){
+					var obj = document.querySelector(elements[i]);
+					if(obj == null) return;
+					obj.click();
+					i++;
+				}
+			} catch(e){alert(e);}
+		}, delay);
+		setTimeout(function(){
+			if(autoClose) window.close();
+		}, delay+1000);		
+	}
+	document.onreadystatechange = function () {
+		autoClick1by1();
+	}
 })();
