@@ -6,6 +6,7 @@
 // @include      *
 // @downloadURL    https://raw.githubusercontent.com/jasonshaw/userscript/master/panlinkaddpw.user.js
 // @updateURL      https://raw.githubusercontent.com/jasonshaw/userscript/master/panlinkaddpw.user.js
+// @note         遇到无法自动更新的可以将脚本中 @updateURL  改为 // @require 即可
 // @note         改变程序逻辑对更多的情况进行支持
 // @note         增加处理盘密码就在链接的文本本身上
 // @note         增加脚本运行判断，解决个别页面动态加载问题，比如新浪微博
