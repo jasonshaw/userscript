@@ -13,7 +13,6 @@
 // @updateURL    https://github.com/jasonshaw/userscript/raw/master/autoClick1by1.user.js
 // @note         允许自定义网站的点击延迟时间
 // @note         允许自定义网站的是否在系列点击之后关闭网页
-// @note         增加脚本运行判断，解决个别页面动态加载问题，比如睿派克签到
 // @note         支持kds阻止相册自动翻页
 // @note         支持睿派克、人大论坛自动等自动签到
 // @note         支持卡饭、睿派克自动关闭侧栏
@@ -61,7 +60,7 @@
 		setTimeout(function(){
 			try {
 				var elements = prefs[site].elements;
-				alert(elements);
+				//alert(elements);
 				while(elements[i]){
 					var obj = document.querySelector(elements[i]);
 					if(obj == null) return;
@@ -74,7 +73,7 @@
 			if(autoClose) window.close();
 		}, delay+1000);		
 	}
-	document.onreadystatechange = function () {
+	autoClick1by1();
+	/*document.onreadystatechange = function () {
 		autoClick1by1();
-	}
-})();
+	}*/;
