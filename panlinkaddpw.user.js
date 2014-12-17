@@ -25,19 +25,18 @@
 // @copyright  2014+, jasonshaw
 // ==/UserScript==
 (function(){
-	//alert(document.querySelectorAll('a[href^="http://pan.baidu.com/s/"]').length);
-	//var delay = 200;//ms
+	var common_reg = /\s*(提取密碼|提取密码|提取码|提取碼|提取|密碼|密码|百度|百度云|云盘|360云盘|360云|360yun|yun)[:：]?\s*(<[^>]+>)?\s*([0-9a-zA-Z]{4,})\s*/;
+	var pw_reg = /#[0-9a-zA-Z]{4,}/;
+	var standBy = false,standByList = [/http:\/\/weibo\.com\/.*/i];//将需要等待js运行之后再运行本代码的，将href正则写入数组
+	var prefs = {
+			tieba:['http://jump.bdimg.com/safecheck'],//这个有大量的误操作，因为这只是新浪的短网址，而不一定是网盘，自选使用
+			pan:['http://pan.baidu.com/s/'],//第一个参数定义链接类型，第二个可选参数：后续紧跟着的提取码之类的前缀提示符
+	        yunpan:['http://yunpan.cn/'],
+	        pans:['https://pan.baidu.com/s/'],
+	        tpan:['http://t.cn/'],//这个有大量的误操作，因为这只是新浪的短网址，而不一定是网盘，自选使用
+	};
 	function panlinkWithPw(){	
-		var common_reg = /\s*(提取密碼|提取密码|提取码|提取碼|提取|密碼|密码|百度|百度云|云盘|360云盘|360云|360yun|yun)[:：]?\s*(<[^>]+>)?\s*([0-9a-zA-Z]{4,})\s*/;
-		var pw_reg = /#[0-9a-zA-Z]{4,}/;
-		var standBy = false,standByList = [/http:\/\/weibo\.com\/.*/i];//将需要等待js运行之后再运行本代码的，将href正则写入数组
-		var prefs = {
-				tieba:['http://jump.bdimg.com/safecheck'],//这个有大量的误操作，因为这只是新浪的短网址，而不一定是网盘，自选使用
-				pan:['http://pan.baidu.com/s/'],//第一个参数定义链接类型，第二个可选参数：后续紧跟着的提取码之类的前缀提示符
-		        yunpan:['http://yunpan.cn/'],
-		        pans:['https://pan.baidu.com/s/'],
-		        tpan:['http://t.cn/'],//这个有大量的误操作，因为这只是新浪的短网址，而不一定是网盘，自选使用
-		};
+		
 		var href = window.location.href,site = null,i = 0;
 		while (standByList[i]) if(standByList[i++].test(href)) {standBy = true; break;}
 		var panlinks,r = null,reg,i,nC,nN,pN,pos,subS;
