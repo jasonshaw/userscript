@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name  配合网盘密码自动提取，融合链接与提取码
 // @namespace  panlink.jasonshaw
-// @version    0.6
+// @version    0.6.1
 // @description  自动处理网盘链接及其提取码变成支持自动填充密码的方式的链接（百度云、360pan等）
 // @include      *
 // @downloadURL    https://raw.githubusercontent.com/jasonshaw/userscript/master/panlinkaddpw.user.js
 // @updateURL      https://raw.githubusercontent.com/jasonshaw/userscript/master/panlinkaddpw.user.js
 // @require      https://raw.githubusercontent.com/jasonshaw/userscript/master/panlinkaddpw.user.js
+// @note         修复一个手误bug 
 // @note         改变程序逻辑以适应一些特殊环境
 // @note         修复一个bug，彻底解决重复后缀密码问题
 // @note         增加脚本运行判断的设定，默认自动运行，对于类似新浪微博类网址，才执行判断后执行  
@@ -35,8 +36,7 @@
 	        pans:['https://pan.baidu.com/s/'],
 	        tpan:['http://t.cn/'],//这个有大量的误操作，因为这只是新浪的短网址，而不一定是网盘，自选使用
 	};
-	function panlinkWithPw(){	
-		
+	function panlinkWithPw(){
 		var href = window.location.href,site = null,i = 0;
 		while (standByList[i]) if(standByList[i++].test(href)) {standBy = true; break;}
 		var panlinks,r = null,reg,i,nC,nN,pN,pos,subS;
@@ -58,12 +58,15 @@
 					if(r!=null) panlinks[i].href += '#'+r[3];
 					else {
 						pN = panlinks[i].parentNode.parentNode.innerHTML;
-						//截取子串避免密码“张冠李戴”
 						pos = pN.indexOf(panlinks[i].href);
-						subS = pN.substr(pN.indexOf(panlinks[i].href));
+						subS = pN.substr(pN.indexOf(panlinks[i].href)+1);
 						var pos_end = subS.length,temp;
-						for (var key1 in prefs) { temp = pN.indexOf(prefs[key1][0]);if(temp<pos_end) pos_end = temp}
-						subS = pN.substr(0,pos_end-1);
+						for (var key1 in prefs) {
+							temp = pN.indexOf(prefs[key1][0]);
+							if(temp==-1) continue;
+							if(temp!=pos&&temp<pos_end) pos_end = temp;
+						}
+						subS = subS.substr(0,pos_end-1);
 						r = subS.match(reg);
 						if(r!=null) panlinks[i].href += '#'+r[3];
 					}
@@ -78,7 +81,6 @@
 		var observer = new MutationObserver(function(mutations){
 			var nodeAdded = mutations.some(function(x){ return x.addedNodes.length > 0; });
 			if (nodeAdded) {
-			// observer.disconnect();
 			callback();
 			}
 		});
@@ -91,6 +93,3 @@
 	if(standBy) {document.onreadystatechange = function () { if(document.readyState == "complete") panlinkWithPw(); }}
 	else panlinkWithPw();
 })();
-
-
-
